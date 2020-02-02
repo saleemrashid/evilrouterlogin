@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  </head>
+  <body>
+    <script>
+      function onFulfilled() {
+        const redirect = new URL(location).searchParams.get("redirect");
+        if (redirect) {
+          location.href = redirect;
+        }
+      }
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js").then(onFulfilled, onFulfilled);
+      } else {
+        onFulfilled();
+      }
+    </script>
+  </body>
+</html>

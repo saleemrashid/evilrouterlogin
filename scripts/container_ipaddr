@@ -1,0 +1,4 @@
+#!/bin/bash
+set -euo pipefail
+NAMES=($(docker-compose ps -q "$@"))
+docker inspect --format="{{ range .NetworkSettings.Networks }}{{ .IPAddress }}{{ end }}" "${NAMES[@]}"

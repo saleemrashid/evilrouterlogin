@@ -1,0 +1,29 @@
+daemon off;
+
+events {}
+
+http {
+    add_header Cache-Control no-store always;
+
+    server {
+        listen 443 ssl;
+        server_name <%= ENV["ROUTERLOGIN_NAME"] %>;
+        ssl_certificate routerlogin.crt;
+        ssl_certificate_key routerlogin.key;
+
+        location / {
+            proxy_pass http://<%= ENV["PROXY_ADDRESS"] %>;
+            proxy_hide_header Cache-Control;
+            proxy_hide_header Pragma;
+            proxy_hide_header Expires;
+            proxy_hide_header ETag;
+            proxy_hide_header Last-Modified;
+        }
+    }
+
+    server {
+        listen 80;
+        server_name <%= ENV["ROUTERLOGIN_NAME" ] %>;
+        return 302 https://<%= ENV["ROUTERLOGIN_NAME"] %>$request_uri;
+    }
+}

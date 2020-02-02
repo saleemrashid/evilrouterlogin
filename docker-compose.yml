@@ -1,0 +1,71 @@
+---
+version: "3.7"
+services:
+    unbound-evil:
+        build: ./unbound-docker
+        dns:
+            - 8.8.8.8
+            - 8.8.4.4
+        networks:
+            evil:
+    nginx-evil:
+        build: ./nginx-docker
+        environment:
+            - CAPTIVEPORTAL_NAME
+            - ROUTERLOGIN_NAME
+        volumes:
+            - type: bind
+              source: "./${ROUTERLOGIN_NAME}.pem"
+              target: /etc/nginx/routerlogin.crt
+              read_only: true
+            - type: bind
+              source: "./${ROUTERLOGIN_NAME}-key.pem"
+              target: /etc/nginx/routerlogin.key
+              read_only: true
+            - type: bind
+              source: ./evil.nginx.erb
+              target: /etc/nginx/nginx.conf.erb
+              read_only: true
+            - type: bind
+              source: ./www-evil
+              target: /var/www
+              read_only: true
+        networks:
+            evil:
+                aliases:
+                    - "${CAPTIVEPORTAL_NAME}"
+                    - "${ROUTERLOGIN_NAME}"
+    unbound-secure:
+        build: ./unbound-docker
+        dns:
+            - 8.8.8.8
+            - 8.8.4.4
+        networks:
+            secure:
+    nginx-secure:
+        build: ./nginx-docker
+        environment:
+            - CAPTIVEPORTAL_NAME
+            - PROXY_ADDRESS
+            - ROUTERLOGIN_NAME
+        volumes:
+            - type: bind
+              source: "./${ROUTERLOGIN_NAME}.pem"
+              target: /etc/nginx/routerlogin.crt
+              read_only: true
+            - type: bind
+              source: "./${ROUTERLOGIN_NAME}-key.pem"
+              target: /etc/nginx/routerlogin.key
+              read_only: true
+            - type: bind
+              source: ./secure.nginx.erb
+              target: /etc/nginx/nginx.conf.erb
+              read_only: true
+        networks:
+            secure:
+                aliases:
+                    - "${ROUTERLOGIN_NAME}"
+
+networks:
+    evil:
+    secure:
